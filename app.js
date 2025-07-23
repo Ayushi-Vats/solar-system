@@ -222,3 +222,19 @@ window.addEventListener("resize", () => {
     spaceCamera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
+        // Hamburger toggle logic
+const hamburgerBtn = document.getElementById('hamburger-btn');
+ const controlPanel = document.getElementById('control-panel');
+
+// Start minimized: control panel hidden, hamburger not open
+controlPanel.classList.remove('open');
+controlPanel.classList.add('minimized');
+hamburgerBtn.classList.remove('open');
+hamburgerBtn.setAttribute('aria-expanded', 'false');
+
+hamburgerBtn.addEventListener('click', () => {
+    const isOpen = controlPanel.classList.toggle('open');
+    controlPanel.classList.toggle('minimized', !isOpen);
+    hamburgerBtn.classList.toggle('open', isOpen);
+    hamburgerBtn.setAttribute('aria-expanded', isOpen.toString());
+});
