@@ -1,0 +1,263 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>3D Solar System</title>
+    <style>
+        /* Reset and base styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: black;
+            font-family: Arial, sans-serif;
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        canvas {
+            display: block;
+            flex-grow: 1;
+            width: 100%;
+            height: 100%;
+            cursor: default;
+        }
+
+        /* Toggle Animation Button */
+        #toggleAnimation {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 30;
+            background-color: rgba(0,0,0,0.7);
+            border: 1px solid white;
+            color: white;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            user-select: none;
+            transition: background-color 0.3s ease;
+        }
+        #toggleAnimation:hover,
+        #toggleAnimation:focus {
+            background-color: rgba(255,255,255,0.1);
+            outline: none;
+        }
+
+        /* Hamburger Button (top-left) */
+        #hamburger-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 40;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            background: transparent;
+            border: none;
+            padding: 0;
+            user-select: none;
+        }
+        #hamburger-btn span {
+            display: block;
+            width: 100%;
+            height: 3px;
+            background-color: white;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        #hamburger-btn.open span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        #hamburger-btn.open span:nth-child(2) {
+            opacity: 0;
+        }
+        #hamburger-btn.open span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+
+        /* Control Panel sliding from left */
+        #control-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 280px;
+            max-width: 80vw;
+            background-color: rgba(0,0,0,0.85);
+            padding: 20px 15px;
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+            box-shadow: 2px 0 10px rgba(255,255,255,0.2);
+            backdrop-filter: saturate(180%) blur(10px);
+            -webkit-backdrop-filter: saturate(180%) blur(10px);
+            box-sizing: border-box;
+            overflow-y: auto;
+            font-size: 14px;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: 35;
+        }
+        #control-panel.minimized {
+            transform: translateX(-100%);
+        }
+        #control-panel.open {
+            transform: translateX(0);
+        }
+        #control-panel h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-weight: 600;
+            font-size: 20px;
+            user-select: none;
+        }
+        #control-panel label {
+            display: block;
+            margin-top: 12px;
+            margin-bottom: 6px;
+        }
+        #control-panel input[type=range] {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        /* Tooltip styles */
+        #tooltip {
+            position: fixed;
+            pointer-events: none;
+            background: rgba(0,0,0,0.75);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            white-space: nowrap;
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            user-select: none;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 900px) {
+            #control-panel {
+                width: 240px;
+                font-size: 13px;
+                padding: 18px 12px;
+            }
+            #control-panel h3 {
+                font-size: 18px;
+                margin-bottom: 12px;
+            }
+            #control-panel label {
+                margin-top: 10px;
+                margin-bottom: 5px;
+            }
+            #toggleAnimation {
+                bottom: 15px;
+                right: 15px;
+                font-size: 13px;
+                padding: 7px 10px;
+            }
+            #hamburger-btn {
+                top: 15px;
+                left: 15px;
+                width: 28px;
+                height: 28px;
+            }
+        }
+        @media (max-width: 640px) {
+            #control-panel {
+                width: 200px;
+                font-size: 12px;
+                padding: 15px 10px;
+            }
+            #control-panel h3 {
+                font-size: 16px;
+                margin-bottom: 10px;
+            }
+            #control-panel label {
+                margin-top: 8px;
+                margin-bottom: 4px;
+            }
+            #toggleAnimation {
+                bottom: 12px;
+                right: 12px;
+                font-size: 12px;
+                padding: 6px 9px;
+            }
+            #hamburger-btn {
+                top: 12px;
+                left: 12px;
+                width: 26px;
+                height: 26px;
+            }
+        }
+        @media (max-width: 400px) {
+            #control-panel {
+                width: 180px;
+                font-size: 11px;
+                padding: 12px 8px;
+            }
+            #control-panel h3 {
+                font-size: 15px;
+                margin-bottom: 8px;
+            }
+            #control-panel label {
+                margin-top: 6px;
+                margin-bottom: 3px;
+            }
+            #toggleAnimation {
+                bottom: 10px;
+                right: 10px;
+                font-size: 11px;
+                padding: 5px 8px;
+            }
+            #hamburger-btn {
+                top: 10px;
+                left: 10px;
+                width: 24px;
+                height: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="hamburger-btn" aria-label="Toggle control panel" aria-expanded="false" aria-controls="control-panel" class="">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <div id="control-panel" aria-label="Speed control panel" class="">
+        <h3>Speed Control</h3>
+        <label for="mercury-speed">Mercury Speed:</label>
+        <input type="range" id="mercury-speed" min="0" max="10" value="1" step="0.1" />
+        <label for="venus-speed">Venus Speed:</label>
+        <input type="range" id="venus-speed" min="0" max="10" value="1" step="0.1" />
+        <label for="earth-speed">Earth Speed:</label>
+        <input type="range" id="earth-speed" min="0" max="10" value="1" step="0.1" />
+        <label for="mars-speed">Mars Speed:</label>
+        <input type="range" id="mars-speed" min="0" max="10" value="1" step="0.1" />
+        <label for="jupiter-speed">Jupiter Speed:</label>
+        <input type="range" id="jupiter-speed" min="0" max="10" value="1" step="0.1" />
+        <label for="saturn-speed">Saturn Speed:</label>
+        <input type="range" id="saturn-speed" min="0" max="10" value="1" step="0.1" />
+        <label for="uranus-speed">Uranus Speed:</label>
+        <input type="range" id="uranus-speed" min="0" max="10" value="1" step="0.1" />
+        <label for="neptune-speed">Neptune Speed:</label>
+        <input type="range" id="neptune-speed" min="0" max="10" value="1" step="0.1" />
+    </div>
+    <button id="toggleAnimation" aria-pressed="false" aria-label="Pause or resume animation">Pause</button>
+
+    <div id="tooltip" role="tooltip" aria-hidden="true"></div>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+    <script src="app.js"></script>
+    </body>
+    </html>
